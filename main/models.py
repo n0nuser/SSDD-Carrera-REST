@@ -1,14 +1,32 @@
 from threading import Thread, Condition, Lock
 from time import sleep
 import requests
-from random import choice
-
-# from .utils import synchronized
+from random import uniform as rango_float
+from threading import Lock
 
 numAtletas = 4
 HOST = "127.0.0.1"
 PORT = 8080
 FICHERO = "resultados.log"
+
+
+# https://www.caffeinatedideas.com/2014/12/12/java-synchronized-in-python.html
+def synchronized(method):
+    """
+    A decorator object that can be used to declare that execution of a particular
+    method should be done synchronous. This works by maintaining a lock object on
+    the object instance, constructed for you if you don't have one already, and
+    then acquires the lock before allowing the method to execute. This provides
+    similar semantics to Java's synchronized keyword on methods.
+    """
+
+    def new_synchronized_method(self, *args, **kwargs):
+        if not hasattr(self, "_auto_lock"):
+            self._auto_lock = Lock()
+        with self._auto_lock:
+            return method(self, *args, **kwargs)
+
+    return new_synchronized_method
 
 
 class Shot:
@@ -26,6 +44,7 @@ class Shot:
         """
         return self._flag
 
+    # @synchronized
     def wait(self, timeout=None):
         """Si el flag es falso, espera a que sea notificado.
         Args:
@@ -43,6 +62,7 @@ class Shot:
             pass
             self._cond.release()
 
+    # @synchronized
     def notify(self):
         """Habilita la flag a verdadero y lo notifica. Dejando así los hilos que estuvieran bloqueados ejecutar sus funciones."""
         self._cond.acquire()
@@ -65,33 +85,27 @@ class Atleta(Thread):
         Thread.__init__(self)
 
     def start_race(self):
-        print("START_RACE :", self.dorsal)
-
-        preparado = requests.get(f"http://{HOST}:{PORT}/preparado")
-        print(preparado)
-        print("Pr :", self.dorsal)
-
-        listo = requests.get(f"http://{HOST}:{PORT}/listo")
-        print("Li :", self.dorsal)
-        """Espera un tiempo entre 9.56 y 11.76 segundos y lo imprime por pantalla."""
-        tiempo_carrera = choice(range(9.56, 12.76))
-
-        sleep(tiempo_carrera)
-        print("SLEEP :", self.dorsal)
-
-        llegada = requests.get(f"http://{HOST}:{PORT}/llegada")
-        print("Ll :", self.dorsal)
-
         with open(FICHERO, "a+") as f:
-            f.write(self.dorsal, ": ", preparado)
-            f.write(self.dorsal, ": ", listo)
-            f.write(self.dorsal, ": ", llegada)
+
+            preparado = requests.get(f"http://{HOST}:{PORT}/preparado")
+            print(preparado.text)
+            f.write(f"{self.dorsal}: {preparado.text}\n")
+
+            listo = requests.get(f"http://{HOST}:{PORT}/listo")
+            print(listo.text)
+            f.write(f"{self.dorsal}: {listo.text}\n")
+
+            """Espera un tiempo entre 9.56 y 11.76 segundos y lo imprime por pantalla."""
+            sleep(rango_float(9.56, 11.76))
+
+            llegada = requests.get(f"http://{HOST}:{PORT}/llegada/{self.dorsal}")
+            print(llegada.text)
+            f.write(f"{self.dorsal}: {llegada.text}\n")
 
     def run(self):
         """Método que sobrescribe al propio de la clase Thread.
         Realiza el bloqueo hasta recibir la notificación, entonces ejecuta ciertas funciones.
         """
-        print("RUN METHOD")
         self.start_race()
 
 

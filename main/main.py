@@ -1,8 +1,7 @@
-import uvicorn
-import logging
 import time
-from fastapi import FastAPI
-from .models import Atleta, Shot, Variables
+import logging
+from flask import Flask
+from .models import Shot, Variables
 
 numAtletas = 4
 HOST = "127.0.0.1"
@@ -17,65 +16,58 @@ finCarrera = Shot()
 variables = Variables()
 
 logger = logging.getLogger(__name__)
-api = FastAPI()
+api = Flask(__name__)
 
 
-@api.get("/reinicio")
-async def reinicio():
+@api.route("/reinicio")
+def reinicio():
+    global tiempoIni
+    global atletas
     variables.reiniciar()
     tiempoIni = 0
     atletas = {}
-    message = "Variables reiniciadas."
-    return {"message": message}
+    return "Variables reiniciadas."
 
 
-@api.get("/preparado")
-async def preparado():
-    print("Preparado")
+@api.route("/preparado")
+def preparado():
     numPreparados = variables.actualizar("preparados")
-    print("NumPreparados:", numPreparados)
     if numPreparados < numAtletas:
-        print("Me espero mi pana")
         pistoletazo.wait()
     else:
-        print("ARRANCAMIOS LEEROY JENKINS")
         pistoletazo.notify()
-    message = "Preparados..."
-    return {"message": message}
+    return "Preparado..."
 
 
-@api.get("/listo")
-async def listo():
+@api.route("/listo")
+def listo():
+    global tiempoIni
     numListos = variables.actualizar("listos")
     if numListos < numAtletas:
         pistoletazo.wait()
     else:
         pistoletazo.notify()
         tiempoIni = time.time()
-    message = "Listo..."
-    return {"message": message}
+    return "Listo..."
 
 
-@api.get("/llegada")
-async def llegada(dorsal: int):
-    tiempoFin = time.time() - tiempoIni
-    atletas[dorsal] = tiempoFin
+@api.route("/llegada/<int:dorsal>")
+def llegada(dorsal: int):
+    atletas[dorsal] = time.time() - tiempoIni
     numFinalizados: int = variables.actualizar("finalizados")
-    if numFinalizados == numAtletas:
-        finCarrera.notify()
-    message = f"{tiempoFin}"
-    return {"message": message}
+    # if numFinalizados == numAtletas:
+    # finCarrera.notify()
+    return f"{atletas[dorsal]} segundos"
 
 
-@api.get("/resultados")
-async def resultados():
-    finCarrera.wait()
+@api.route("/resultados")
+def resultados():
+    # finCarrera.wait()
     message = ""
     for key, value in atletas.items():
         message = message + f"Atleta {key}: {value} segundos.\n"
-    return {"message": message}
+    return message
 
 
 def start():
-    """Launched with `poetry run start` at root level"""
-    uvicorn.run("main.main:api", host=HOST, port=PORT)
+    api.run(host=HOST, port=PORT)

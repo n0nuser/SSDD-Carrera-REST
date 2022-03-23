@@ -1,26 +1,27 @@
 import requests
-from models import Atleta
-import os
+from .models import Atleta
 
 numAtletas = 4
 HOST = "127.0.0.1"
 PORT = 8080
 FICHERO = "resultados.log"
 
-reinicio = requests.get(f"http://{HOST}:{PORT}/reinicio")
 
-atletas = []
-for num in range(numAtletas):
-    print(num)
-    atletas.append(Atleta(dorsal="10" + str(num)))
-    print("okay!")
+def start():
+    reinicio = requests.get(f"http://{HOST}:{PORT}/reinicio")
 
-print("Atletas comienzan")
-for atleta in atletas:
-    atleta.start()
-print("Atletas han comenzado")
+    atletas = []
+    for num in range(numAtletas):
+        atletas.append(Atleta(dorsal="10" + str(num)))
 
-resultados = requests.get(f"http://{HOST}:{PORT}/resultados")
-with open(FICHERO, "a+") as f:
-    f.write(reinicio)
-    f.write(resultados)
+    for atleta in atletas:
+        atleta.start()
+    print("Atletas -> Hilos START")
+
+    for atleta in atletas:
+        atleta.join()
+
+    with open(FICHERO, "a+") as f:
+        resultados = requests.get(f"http://{HOST}:{PORT}/resultados")
+        print(resultados.text)
+        f.write(resultados.text)
