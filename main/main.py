@@ -55,14 +55,11 @@ def listo():
 def llegada(dorsal: int):
     atletas[dorsal] = time.time() - tiempoIni
     numFinalizados: int = variables.actualizar("finalizados")
-    # if numFinalizados == numAtletas:
-    # finCarrera.notify()
     return f"{atletas[dorsal]} segundos"
 
 
 @api.route("/resultados")
 def resultados():
-    # finCarrera.wait()
     message = ""
     for key, value in atletas.items():
         message = message + f"Atleta {key}: {value} segundos.\n"

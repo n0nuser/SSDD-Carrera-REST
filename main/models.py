@@ -10,25 +10,6 @@ PORT = 8080
 FICHERO = "resultados.log"
 
 
-# https://www.caffeinatedideas.com/2014/12/12/java-synchronized-in-python.html
-def synchronized(method):
-    """
-    A decorator object that can be used to declare that execution of a particular
-    method should be done synchronous. This works by maintaining a lock object on
-    the object instance, constructed for you if you don't have one already, and
-    then acquires the lock before allowing the method to execute. This provides
-    similar semantics to Java's synchronized keyword on methods.
-    """
-
-    def new_synchronized_method(self, *args, **kwargs):
-        if not hasattr(self, "_auto_lock"):
-            self._auto_lock = Lock()
-        with self._auto_lock:
-            return method(self, *args, **kwargs)
-
-    return new_synchronized_method
-
-
 class Shot:
     """Clase manejadora de los hilos. Define las funciones para la gestión de la concurrencia y notificación a los demás hilos."""
 
@@ -44,7 +25,6 @@ class Shot:
         """
         return self._flag
 
-    # @synchronized
     def wait(self, timeout=None):
         """Si el flag es falso, espera a que sea notificado.
         Args:
@@ -62,7 +42,6 @@ class Shot:
             pass
             self._cond.release()
 
-    # @synchronized
     def notify(self):
         """Habilita la flag a verdadero y lo notifica. Dejando así los hilos que estuvieran bloqueados ejecutar sus funciones."""
         self._cond.acquire()
@@ -117,7 +96,6 @@ class Variables:
         self.numListos = numListos
         self.numFinalizados = numFinalizados
 
-    # @synchronized
     def actualizar(self, variable: str) -> int:
         if variable == "preparados":
             self.numPreparados = self.numPreparados + 1
@@ -129,7 +107,6 @@ class Variables:
             self.numFinalizados = self.numListos + 1
             return self.numFinalizados
 
-    # @synchronized
     def reiniciar(self) -> None:
         self.numPreparados = 0
         self.numListos = 0
