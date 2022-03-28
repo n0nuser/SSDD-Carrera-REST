@@ -54,15 +54,15 @@ def listo():
 @api.route("/llegada/<int:dorsal>")
 def llegada(dorsal: int):
     atletas[dorsal] = time.time() - tiempoIni
-    numFinalizados: int = variables.actualizar("finalizados")
-    return f"{atletas[dorsal]} segundos"
+    numFinalizados = variables.actualizar("finalizados")
+    return str(str(atletas[dorsal]) + " segundos")
 
 
 @api.route("/resultados")
 def resultados():
     message = ""
     for key, value in atletas.items():
-        message = message + f"Atleta {key}: {value} segundos.\n"
+        message = str(message) + "Atleta " + str(key) + ": " + str(value) + " segundos.\n"
     return message
 
 

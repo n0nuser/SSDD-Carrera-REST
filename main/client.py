@@ -8,7 +8,7 @@ FICHERO = "resultados.log"
 
 
 def start():
-    reinicio = requests.get(f"http://{HOST}:{PORT}/reinicio")
+    reinicio = requests.get("http://" + HOST + ":" + str(PORT) + "/reinicio")
 
     atletas = []
     for num in range(numAtletas):
@@ -22,6 +22,6 @@ def start():
         atleta.join()
 
     with open(FICHERO, "a+") as f:
-        resultados = requests.get(f"http://{HOST}:{PORT}/resultados")
+        resultados = requests.get("http://" + HOST + ":" + str(PORT) + "/resultados")
         print(resultados.text)
         f.write(resultados.text)

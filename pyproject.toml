@@ -9,8 +9,8 @@ server = "main.main:start"
 client = "main.client:start"
 
 [tool.poetry.dependencies]
-python = "3.5.3"
-requests = "^2.27.1"
+python = ">=3.5.3, <3.6"
+requests = "*"
 Flask = ">=1.1, <2"
 
 [tool.poetry.dev-dependencies]

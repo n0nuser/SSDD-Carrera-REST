@@ -66,20 +66,20 @@ class Atleta(Thread):
     def start_race(self):
         with open(FICHERO, "a+") as f:
 
-            preparado = requests.get(f"http://{HOST}:{PORT}/preparado")
+            preparado = requests.get("http://" + HOST + ":" + str(PORT) + "/preparado")
             print(preparado.text)
-            f.write(f"{self.dorsal}: {preparado.text}\n")
+            f.write(self.dorsal + ": " + preparado.text + "\n")
 
-            listo = requests.get(f"http://{HOST}:{PORT}/listo")
+            listo = requests.get("http://" + HOST + ":" + str(PORT) + "/listo")
             print(listo.text)
-            f.write(f"{self.dorsal}: {listo.text}\n")
+            f.write(self.dorsal + ": " + listo.text + "\n")
 
             """Espera un tiempo entre 9.56 y 11.76 segundos y lo imprime por pantalla."""
             sleep(rango_float(9.56, 11.76))
 
-            llegada = requests.get(f"http://{HOST}:{PORT}/llegada/{self.dorsal}")
+            llegada = requests.get("http://" + HOST + ":" + str(PORT) + "/llegada/" + self.dorsal)
             print(llegada.text)
-            f.write(f"{self.dorsal}: {llegada.text}\n")
+            f.write(self.dorsal + ": " + llegada.text + "\n")
 
     def run(self):
         """Método que sobrescribe al propio de la clase Thread.
